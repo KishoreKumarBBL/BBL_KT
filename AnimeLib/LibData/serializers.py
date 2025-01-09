@@ -2,9 +2,9 @@ from rest_framework import serializers
 from.models import AnimeUser
 
 class AnimeUserserializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True, unique=True)
-    email = serializers.EmailField(required=True, unique=True)
-    password = serializers.CharField(required=True)
+    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(min_length=5,max_length=10,write_only=True)
     firstname = serializers.CharField(required=True)
     lastname = serializers.CharField(required=True)
 
