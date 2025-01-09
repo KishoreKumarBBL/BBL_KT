@@ -12,7 +12,7 @@ class AnimeUserserializer(serializers.ModelSerializer):
         model = AnimeUser
         fields = ['username','firstname','lastname','email','password']
 
-def validate(self,data):
+def validate(self,data): 
     firstname = data.get('firstname','')
     username = data.get('username','')
 
