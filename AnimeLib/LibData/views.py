@@ -9,7 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 class UserReg(generics.CreateAPIView):# CreateAPIView is used to POST the Data
     serializer_class = AnimeUserserializer # Sets AnimeUserserializer as Serializer class
 
-    def create(self, request):
+    def create(self, request):# overriding CreateAPIView
         serializer = AnimeUserserializer(data=request.data) # Uses the AnimeUserserializer as serializer class
 
         serializer.is_valid(raise_exception=True)
