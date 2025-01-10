@@ -24,4 +24,4 @@ def validate(self,data):
     return data 
 
 def create(self,validate_data):
-    return AnimeUser.objects.UserData(**validate_data)
+    return AnimeUser.objects.UserData(**validate_data)# returns the data in dictionary
