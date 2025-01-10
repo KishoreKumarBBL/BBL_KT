@@ -25,5 +25,5 @@ class AnimeUser(AbstractBaseUser): # User class
 
 objects = UserData()    
 
-def __str(self,email):
+def __str__(self,email):
     return self.email
