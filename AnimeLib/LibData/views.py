@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .serializers import AnimeUserserializer
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
+from decouple import config
 # Create your views here.
 class UserReg(generics.CreateAPIView):# CreateAPIView is used to POST the Data
     serializer_class = AnimeUserserializer # Sets AnimeUserserializer as Serializer class
@@ -18,7 +19,8 @@ class UserReg(generics.CreateAPIView):# CreateAPIView is used to POST the Data
 
 
 class pagestyle(PageNumberPagination):
-    page_size = 1         
+    page_size = config("page_size")
+    page_query_param = config("page_param")       
 
 
 
