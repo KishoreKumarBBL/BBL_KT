@@ -6,7 +6,7 @@ from .serializers import AnimeUserserializer
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 # Create your views here.
-class UserRegistration(generics.CreateAPIView):# CreateAPIView is used to POST the Data
+class UserReg(generics.CreateAPIView):# CreateAPIView is used to POST the Data
     serializer_class = AnimeUserserializer # Sets AnimeUserserializer as Serializer class
 
     def create(self, request):
