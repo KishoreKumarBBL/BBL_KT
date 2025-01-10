@@ -9,7 +9,7 @@ class UserData(BaseUserManager): # Manager class
             raise ValueError('Users must have a username')
         
         user = self.model(username=username,email=self.normalize_email(email),firstname=firstname,lastname=lastname)
-        user.set_password(password)
+        user.set_password(password) # Hashing password
         user.save()
         return user
 

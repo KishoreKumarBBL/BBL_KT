@@ -13,7 +13,7 @@ class UserRegistration(generics.CreateAPIView):# CreateAPIView is used to POST t
         serializer = AnimeUserserializer(data=request.data) # Uses the AnimeUserserializer as serializer class
 
         serializer.is_valid(raise_exception=True)
-        serializer.save() # saves AnimeUserserializer
+        serializer.save() 
         return Response (serializer.data,status=status.HTTP_201_CREATED)
 
 class UserLogin(generics.GenericAPIView):
