@@ -26,7 +26,7 @@ class AnimeUserserializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email already exists!")
         return value
 
-    # Object-level validation (can be used to validate one or more fields or write extra logics)
+    # Can be used to validate one or more fields.
     def validate(self, data):
         firstname = data.get('firstname', '')#fetches the firstname from validate_data
         if firstname and firstname.isupper(): # checks if firstname exist and is uppercase
