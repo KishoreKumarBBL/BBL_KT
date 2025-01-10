@@ -23,4 +23,7 @@ class AnimeUser(AbstractBaseUser): # User class
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS =['firstname','lastname','username']
 
-objects = UserData()     
+objects = UserData()    
+
+def __str(self,email):
+    return self.email
