@@ -16,9 +16,6 @@ class UserReg(generics.CreateAPIView):# CreateAPIView is used to POST the Data
         serializer.save() 
         return Response (serializer.data,status=status.HTTP_201_CREATED)
 
-class UserLogin(generics.GenericAPIView):
-     def post (self, request):
-         user=request.data
 
 class pagestyle(PageNumberPagination):
     page_size = 1         
