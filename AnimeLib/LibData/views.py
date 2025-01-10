@@ -27,5 +27,5 @@ class pagestyle(PageNumberPagination):
 
 class UserData(ListAPIView): # ListAPIView is used to GET the Data 
     queryset = AnimeUser.objects.all() # Fetches all the fields from the AnimeUser Model
-    serializer_class = AnimeUserserializer # Tells to use AnimeUserserializer for Serialization
+    serializer_class = AnimeUserserializer # Uses AnimeUserserializer for Serialization
     pagination_class = pagestyle # Sets pagination for seperate views
