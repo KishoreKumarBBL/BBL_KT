@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AnimeUser
+from .models import AnimeUser,UserProfile
 
 class AnimeUserserializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
@@ -44,3 +44,18 @@ class AnimeUserserializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])  # Hash the password
         user.save()
         return user
+
+class Userprofileserializer(serializers.ModelSerializer):
+    profileimg = serializers.FileField(required=True,)
+    location = serializers.CharField(required=False)
+    bio = serializers.CharField(required=True)
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
+        # exclude = (
+        #     "created_at",
+        #     "updated_at",
+        #     "is_deleted"
+        # )
+
+        

@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.base_user import BaseUserManager,AbstractBaseUser
 # Create your models here.
@@ -25,5 +26,20 @@ class AnimeUser(AbstractBaseUser): # User class
 
 objects = UserData()    
 
-def __str__(self,email):
+def __str__(self):
     return self.email
+
+
+
+class UserProfile(models.Model):
+    id = models.UUIDField(primary_key=True,editable=False,default=uuid.uuid4)
+    profileimg = models.ImageField(upload_to='user/pic', blank=True,null=True)
+    bio = models.TextField(max_length=255,blank=True)
+    user = models.OneToOneField(AnimeUser,on_delete=models.CASCADE)
+    location = models.TextField(max_length=255)
+    is_deleted = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.user.email
