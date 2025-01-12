@@ -20,6 +20,8 @@ class AnimeUser(AbstractBaseUser): # User class
     email = models.EmailField(max_length=255,unique=True)
     firstname = models.CharField(max_length=255)
     lastname = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
     USERNAME_FIELD = 'email'
@@ -42,6 +44,5 @@ class UserProfile(models.Model):
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 
-    def __str__(self):
-        return self.user.email
+
 
