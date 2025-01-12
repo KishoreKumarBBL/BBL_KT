@@ -11,7 +11,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 # from rest_framework.permissions import IsAuthenticated
 # Create your views here.
-class UserReg(generics.CreateAPIView):# CreateAPIView is used to POST the Data
+class Registration(generics.CreateAPIView):# CreateAPIView is used to POST the Data
     serializer_class = AnimeUserserializer # Sets AnimeUserserializer as Serializer class
 
     def create(self, request):# overriding CreateAPIView
@@ -53,6 +53,18 @@ class ViewProfile(ListAPIView): # This is used if there is only Superuser withou
     # def get_queryset(self):
     #     return super().get_queryset() This should be used if we need to filter the user details or to fetch the Authenticated user details
     
+class updateProfile(RetrieveUpdateDestroyAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = Userprofileserializer
+    lookup_field = 'id'
+    pagination_class = pagestyle
+ 
+    # def update(self, request, *args, **kwargs):
+    #     user = self.get_object()
+    #     serializer = self.get_serializer(instance=user, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_update(serializer)
 
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
