@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from.models import AnimeUser,UserProfile
 from rest_framework import generics,status
@@ -10,6 +11,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from UserData.customPagination import Custompagesettings
 from.pagination import pagestyle
+from.utils import get_tokens_for_user
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
 # from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 class Registration(generics.CreateAPIView):# CreateAPIView is used to POST the Data
@@ -62,4 +66,22 @@ class updateProfile(RetrieveUpdateDestroyAPIView):
 
     #     return Response(serializer.data, status=status.HTTP_200_OK)
 
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
+        if not username or not password:  # Check for missing username or password
+            return JsonResponse({'error': 'Username and password are required'}, status=400)
+
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+
+        if user is None or not isinstance(user, AnimeUser):  # Ensure the user is an instance of AnimeUser
+            return JsonResponse({'error': 'Invalid username or password'}, status=400)
+
+        # Generate tokens
+        tokens = get_tokens_for_user(user)
+        return JsonResponse(tokens)
+
+    return JsonResponse({'error': 'Invalid request method, use POST.'}, status=405)

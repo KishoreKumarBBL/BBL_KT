@@ -13,6 +13,7 @@ class UserData(BaseUserManager): # Manager class
         user.set_password(password) # Hashing password
         user.save()
         return user
+    
 
 class AnimeUser(AbstractBaseUser): # User class
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
