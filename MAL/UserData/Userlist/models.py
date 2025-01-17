@@ -23,21 +23,23 @@ class AnimeUser(AbstractBaseUser): # User class
     lastname = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
 
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS =['firstname','lastname','username']
 
-objects = UserData()    
+    objects = UserData()    
 
-def __str__(self):
-    return self.email
+    def __str__(self):
+        return self.email
+     
 
 
 
 class UserProfile(models.Model):
     id = models.UUIDField(primary_key=True,editable=False,default=uuid.uuid4)
-    profileimg = models.ImageField(upload_to='user/pic', blank=True,null=True)
+    profile_pic = models.ImageField(upload_to='user/pic', blank=True,null=True)
     bio = models.TextField(max_length=255,blank=True)
     user = models.OneToOneField(AnimeUser,on_delete=models.CASCADE)
     location = models.TextField(max_length=255)

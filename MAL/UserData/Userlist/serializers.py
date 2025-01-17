@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import AnimeUser,UserProfile
+from django.contrib.auth import authenticate
 
 class AnimeUserserializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
@@ -49,7 +50,7 @@ class AnimeUserserializer(serializers.ModelSerializer):
         return user
 
 class Userprofileserializer(serializers.ModelSerializer):
-    profileimg = serializers.FileField(required=True,)
+    profile_pic = serializers.FileField(required=True,)
     location = serializers.CharField(required=False)
     bio = serializers.CharField(required=True)
     class Meta:
@@ -61,4 +62,21 @@ class Userprofileserializer(serializers.ModelSerializer):
         #     "is_deleted"
         # )
 
+class Loginserializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=255, write_only=True)
+    token = serializers.CharField(max_length=255, read_only=True)
+
+    class Meta:
+        model = AnimeUser
+        fields =['username','password','token']
+
+    def validate(self, data):
+        username = data.get('username', None)
+        password = data.get('password', None)
+        user = authenticate(username=username, password=password)
+        if user is None:
+            raise serializers.ValidationError("Invalid username or password")
+        return data
+    
         
