@@ -1,11 +1,10 @@
 from django.urls import path, re_path
 from .views import (Registration,
-                    Update,Create_Profile,
+                    Update,Create_Profile, UserResetPasswordAPIView,
                     updateProfile,
                     user_login,
                     UserLogoutView,
-                    # RegisterView,
-                    # VerifyEmailView
+                    UserForgotPasswordAPIView
                     )
 app_name = 'userlist'
 
@@ -18,8 +17,8 @@ urlpatterns=[
     # path('api/profile/view/',ViewProfile.as_view(), name= 'ProfileView'),
     path('api/profile/<uuid:id>/',updateProfile.as_view(), name='ProfileUpdate'),
     path('api/login/',user_login.as_view(), name='Login'),
-    # path('register/email', RegisterView.as_view(),name='emailregister'),
-    # path('verify-email/',VerifyEmailView.as_view(),name='verify-email')
+    path('forgotpassword/', UserForgotPasswordAPIView.as_view(),name='emailregister'),
+    path('resetpassword/<uidb64>/<token>/',UserResetPasswordAPIView.as_view(),name='verify-email')
    
 
 ]

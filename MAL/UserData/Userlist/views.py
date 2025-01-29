@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from django.shortcuts import render
 from.models import AnimeUser,UserProfile
 from rest_framework import generics,status
@@ -19,8 +18,18 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from.permission import Isvalid
 from django.urls import reverse
-from django.conf import settings
+from UserData import settings
 from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponseForbidden, JsonResponse
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from UserData.services.azure_mail_service import send_azure_mail
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.contrib.auth.hashers import make_password
 import jwt
 
 # Create your views here.
@@ -128,39 +137,96 @@ class UserLogoutView(APIView):
         return Response({"message": "Logged out successfully!"})
      
 
-# class RegisterView(generics.GenericAPIView):
-#     serializer_class = RegisterSerializer
-#     def post(self, request):
-#         serializer = RegisterSerializer(data=request.data)
-#         if serializer.is_valid():
-#             user = serializer.save()
-#             # Generate a token for the user
-#             token = jwt.encode({'user_id': str(user.id)}, settings.SECRET_KEY, algorithm='HS256')
-#             verification_url = request.build_absolute_uri(
-#                 reverse('userlist:verify-email') + f"?token={token}"
-#             )
-#             # Send verification email
-#             send_mail(
-#                 'Verify Your Email',
-#                 f'Click the link to verify your email: {verification_url}',
-#                 settings.EMAIL_HOST_USER,
-#                 [user.email],
-#                 fail_silently=False,
-#             )
-#             return Response({'message': 'User registered. Check your email for verification link.'}, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserForgotPasswordAPIView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["email"],
+            properties={
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="The email send to reset password",
+                )
+            },
+        ),
+        responses={
+            200: "email send successfully",
+            400: "Bad Request: email is required",
+            500: "Internal Server Error",
+        },
+    )
+    def post(self, request):
+        base_url = "https://localhost:8000"
+        email = request.data.get("email")
+        try:
+            user = AnimeUser.objects.get(email=email)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            reset_url = f"{base_url}/resetpassword/{uid}/{token}/"
+            html_content = render_to_string(
+                "forget_password.html", {"reset_url": reset_url}
+            )
+
+            subject = "Password Reset"
+            from_email = settings.AZURE_SENDER_ADDRESS
+
+            # Send email
+            send_azure_mail(subject, html_content, from_email, email)
+
+            return Response(
+                {"message": "Password reset email sent,f{reset_url}"}, status=status.HTTP_200_OK
+            )
+        except ObjectDoesNotExist:
+            return Response(
+                {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
-# class VerifyEmailView(generics.GenericAPIView):
-#     def get(self, request):
-#         token = request.query_params.get('token')
-#         try:
-#             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-#             user = AnimeUser.objects.get(id=payload['user_id'])
-#             user.is_active = True
-#             user.save()
-#             return Response({'message': 'Email verified successfully!'}, status=status.HTTP_200_OK)
-#         except jwt.ExpiredSignatureError:
-#             return Response({'error': 'Activation link expired.'}, status=status.HTTP_400_BAD_REQUEST)
-#         except jwt.DecodeError:
-#             return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+class UserResetPasswordAPIView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["password", "confirm_password"],
+            properties={
+                "password": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="password"
+                ),
+                "confirm_password": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="confirm_password",
+                ),
+            },
+        ),
+        responses={
+            200: "password rest successfully",
+            400: "Bad Request: password and confirm_password code are required",
+            500: "Internal Server Error",
+        },
+    )
+    def post(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = AnimeUser.objects.get(pk=uid)
+            if default_token_generator.check_token(user, token):
+                new_password = request.data.get("password")
+                confirm_password = request.data.get("confirm_password")
+
+                # Check if passwords match
+                if new_password != confirm_password:
+                    return Response(
+                        {"message": "Passwords do not match"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                user.set_password(new_password)
+                user.save()
+                return Response(
+                    {"message": "Password reset successful"}, status=status.HTTP_200_OK
+                )
+            return Response(
+                {"message": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+        except (TypeError, ValueError, OverflowError, ObjectDoesNotExist):
+            return Response(
+                {"message": "Invalid user ID"}, status=status.HTTP_400_BAD_REQUEST
+            )
