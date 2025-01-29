@@ -4,17 +4,15 @@ from .views import (Registration,
                     updateProfile,
                     user_login,
                     UserLogoutView,
-                    UserForgotPasswordAPIView
+                    UserForgotPasswordAPIView,
+                    Verify_mail
                     )
 app_name = 'userlist'
 
 urlpatterns=[
     path('Register/',Registration.as_view(),name='CreateUser'),
-    # path('Register/view/',UserData.as_view(), name='userData'),
-    path('Register/<uuid:id>/',Update.as_view(), name='Update'),
-    path('api/profile/',Create_Profile.as_view(), name='Profile'),
-    path('api/logout/',UserLogoutView.as_view(),name='Logout'),
-    # path('api/profile/view/',ViewProfile.as_view(), name= 'ProfileView'),
+    path('Register/<uuid:id>', Update.as_view()),
+    path('Verify/<uidb64>/<token>/',Verify_mail.as_view(),name='EmailVerify'),
     path('api/profile/<uuid:id>/',updateProfile.as_view(), name='ProfileUpdate'),
     path('api/login/',user_login.as_view(), name='Login'),
     path('forgotpassword/', UserForgotPasswordAPIView.as_view(),name='emailregister'),

@@ -33,20 +33,45 @@ from django.contrib.auth.hashers import make_password
 import jwt
 
 # Create your views here.
-class Registration(generics.ListCreateAPIView):# CreateAPIView is used to POST the Data
+class Registration(generics.ListCreateAPIView):
     """
-    Allows user to Register 
+    Handles both Registration and Email Activation.
     """
     permission_classes = [Isvalid]
-    serializer_class = AnimeUserserializer # Sets AnimeUserserializer as Serializer class
+    serializer_class = AnimeUserserializer
     pagination_class = Custompagesettings
-    def create(self, request):# overriding CreateAPIView
-        serializer = AnimeUserserializer(data=request.data) # Uses the AnimeUserserializer as serializer class
 
+    def post(self, request, *args, **kwargs):
+        """User Registration"""
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save() 
-        return Response (serializer.data,status=status.HTTP_201_CREATED)
-        
+        user = serializer.save(is_active=False)  # User is initially inactive
+
+        base_url = "http://localhost:8000"
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        activation_url = f"{base_url}/Verify/{uid}/{token}/"
+
+        # Generate Email Content
+        html_content = render_to_string(
+            "Email_Verification.html", {"activation_url": activation_url}
+        )
+
+        subject = "Account Activation"
+        from_email = settings.AZURE_SENDER_ADDRESS
+
+        # Send email
+        send_azure_mail(subject, html_content, from_email, user.email)
+
+        return Response(
+            {
+                "message": "Account created successfully. Please check your email to activate your account.",
+                "activation_link": activation_url  # For debugging, remove in production
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+   
     
     def get_queryset(self):
         return AnimeUser.objects.all()
@@ -56,6 +81,51 @@ class Registration(generics.ListCreateAPIView):# CreateAPIView is used to POST t
 #     queryset = AnimeUser.objects.all() # Fetches all the fields from the AnimeUser Model
 #     serializer_class = AnimeUserserializer # Uses AnimeUserserializer for Serialization
 #     pagination_class = pagestyle # Sets pagination for seperate views
+
+class Verify_mail(generics.GenericAPIView):
+    def get(self, request, uidb64, token):
+        """Handles email verification when user clicks the activation link."""
+        try:
+            # Decode the user id from uidb64 and get the user
+            user_id = urlsafe_base64_decode(uidb64).decode()
+            user = AnimeUser.objects.get(pk=user_id)
+
+            # Check if the token is valid
+            if default_token_generator.check_token(user, token):
+                # Activate the user
+                user.is_active = True
+                user.save()
+
+                # Send an email to the admin notifying that the user was verified
+                subject = "User Account Activation"
+                user_email = user.username
+                html_content = render_to_string(
+                    "Admin_Notification.html", {"user_email":user_email }
+                )
+
+                from_email = settings.AZURE_SENDER_ADDRESS
+                to_email = settings.ADMIN_MAIL
+
+
+                # Send email
+                send_azure_mail(subject, html_content, from_email, to_email)
+
+                # Respond back to the user with a success message
+                return Response(
+                    {"message": "Your account has been activated successfully."},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {"error": "Invalid or expired activation token."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        except (AnimeUser.DoesNotExist, ValueError, TypeError):
+            return Response(
+                {"error": "Invalid activation link."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class Update(RetrieveUpdateDestroyAPIView):
@@ -157,7 +227,7 @@ class UserForgotPasswordAPIView(APIView):
         },
     )
     def post(self, request):
-        base_url = "https://localhost:8000"
+        base_url = "http://localhost:8000"
         email = request.data.get("email")
         try:
             user = AnimeUser.objects.get(email=email)

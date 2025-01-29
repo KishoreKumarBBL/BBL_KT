@@ -149,6 +149,8 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 AZURE_SENDER_ADDRESS = config("EMAIL_HOST_USER")
 AZURE_MAIL_URL = config("AZURE_MAIL_URL")
+ADMIN_MAIL = config("ADMIN_MAIL")
+
 
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
