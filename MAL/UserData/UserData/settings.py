@@ -56,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'Userlist.middleware.APILoggingMiddleware',
+    # 'Userlist.middleware.APILoggingMiddleware',
 
     
 ]
@@ -72,9 +72,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     ),
 }
 
 SWAGGER_SETTINGS = {
@@ -140,6 +140,20 @@ LOGGING = {
     },
 }
 
+EMAIL_BACKEND = config("EMAIL_BACKEND")
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT",cast=int)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS",cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'tensazangetsu2712@gmail.com'
+# EMAIL_HOST_PASSWORD = 'etskkfuebzhchhco'
+
 # DATABASES = {
 #     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 # }
@@ -160,6 +174,32 @@ SIMPLE_JWT = {
 
 }    
 
+AZURE_API_KEY = config("AZURE_API_KEY")
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": "bugbusterstoragekt",
+            "account_key": AZURE_API_KEY,
+            "azure_container": "static",
+            "expiration_secs": None,
+        },
+    },
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": "bugbusterstoragekt",
+            "account_key": AZURE_API_KEY,
+            "azure_container": "media",
+            "expiration_secs": None,
+        },
+    },
+}
+
+
+
+STATIC_URL = "https://bugbusterstoragekt.blob.core.windows.net/static/"
+MEDIA_URL = "https://bugbusterstoragekt.blob.core.windows.net/media/"
 
 
 
@@ -182,6 +222,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -197,10 +239,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = '/app/staticfiles/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
-
+# STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

@@ -50,7 +50,7 @@ class AnimeUserserializer(serializers.ModelSerializer):
         return user
 
 class Userprofileserializer(serializers.ModelSerializer):
-    profile_pic = serializers.FileField(required=True,)
+    profile_pic = serializers.FileField(required=False,)
     location = serializers.CharField(required=False)
     bio = serializers.CharField(required=True)
     class Meta:
@@ -78,5 +78,31 @@ class Loginserializer(serializers.ModelSerializer):
         if user is None:
             raise serializers.ValidationError("Invalid username or password")
         return data
-    
+
+
+from uuid import UUID
+class RegisterSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AnimeUser
+        fields = ('id', 'username', 'firstname','lastname','email', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def get_id(self, obj):
+        # Convert UUID to string
+        if isinstance(obj.id, UUID):
+            return str(obj.id)
+        return obj.id
+
+    def create(self, validated_data):
+        user = AnimeUser.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            firstname=validated_data['firstname'],
+            lastname=validated_data['lastname'],
+            is_active=False  # User is inactive until email is verified
+        )
+        return user    
         
