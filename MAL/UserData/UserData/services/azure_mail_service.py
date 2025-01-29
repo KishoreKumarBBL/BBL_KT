@@ -1,6 +1,6 @@
 from azure.communication.email import EmailClient
 
-from bugbusterslabs import settings
+from  UserData import settings
 
 POLLER_WAIT_TIME = 10
 
