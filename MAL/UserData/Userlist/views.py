@@ -91,35 +91,35 @@ class Verify_mail(generics.GenericAPIView):
             user = AnimeUser.objects.get(pk=user_id)
 
             # Check if the token is valid
-            if default_token_generator.check_token(user, token):
-                # Activate the user
-                user.is_active = True
-                user.save()
-
-                # Send an email to the admin notifying that the user was verified
-                subject = "User Account Activation"
-                user_email = user.username
-                html_content = render_to_string(
-                    "Admin_Notification.html", {"user_email":user_email }
-                )
-
-                from_email = settings.AZURE_SENDER_ADDRESS
-                to_email = settings.ADMIN_MAIL
-
-
-                # Send email
-                send_azure_mail(subject, html_content, from_email, to_email)
-
-                # Respond back to the user with a success message
-                return Response(
-                    {"message": "Your account has been activated successfully."},
-                    status=status.HTTP_200_OK
-                )
-            else:
+            if not default_token_generator.check_token(user, token):
                 return Response(
                     {"error": "Invalid or expired activation token."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+                # Activate the user
+            user.is_active = True
+            user.save()
+
+            # Send an email to the admin notifying that the user was verified
+            subject = "User Account Activation"
+            user_email = user.username
+            html_content = render_to_string(
+                "Admin_Notification.html", {"user_email":user_email }
+            )
+
+            from_email = settings.AZURE_SENDER_ADDRESS
+            to_email = settings.ADMIN_MAIL
+
+
+            # Send email
+            send_azure_mail(subject, html_content, from_email, to_email)
+
+            # Respond back to the user with a success message
+            return Response(
+                {"message": "Your account has been activated successfully."},
+                status=status.HTTP_200_OK
+            )
+        
 
         except (AnimeUser.DoesNotExist, ValueError, TypeError):
             return Response(
@@ -245,7 +245,9 @@ class UserForgotPasswordAPIView(APIView):
             send_azure_mail(subject, html_content, from_email, email)
 
             return Response(
-                {"message": "Password reset email sent,f{reset_url}"}, status=status.HTTP_200_OK
+                {"message": "Password reset email sent",
+                 "reset_url": reset_url
+                 }, status=status.HTTP_200_OK
             )
         except ObjectDoesNotExist:
             return Response(

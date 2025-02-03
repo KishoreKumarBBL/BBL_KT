@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Email</title>
+    <title>User Account Activation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -55,11 +55,11 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">Email Verification</div>
+        <div class="header">Action Required</div>
         <div class="content">
-            <p>You have requested to Verify your Email please click the below button to verify:</p>
-            <p><a href="{{ user_email }}" class="button">Verify</a></p>
-            <p>If you did not request a verify Email, please ignore this email.</p>
+            <p>The user "{{user_email}}" has been succesfully verified please make the user active </p>
+            <p><a href="{{ user_email }}" class="button">Activate</a></p>
+            <!-- <p>If you did not request a verify Email, please ignore this email.</p> -->
             <p>Thank you.</p>
         </div>
         <div class="footer">
